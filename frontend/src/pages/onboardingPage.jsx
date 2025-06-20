@@ -1,44 +1,50 @@
-import React from 'react'
-import useAuthUser from '../hooks/useAuthUser'
-import { QueryClient, useMutation, useQueryClient } from '@tanstack/react-query'
-import { completeOnboarding } from '../lib/api'
-import { CameraIcon, ShuffleIcon } from 'lucide-react'
-import { LANGUAGES } from '../constants'
-import { MapPinIcon,LoaderIcon,ShipWheelIcon } from 'lucide-react'
-const onboardingPage = () => {
-  const { authUser } = useAuthUser()
-  const queryClient = useQueryClient()
+import { useState } from "react";
+import useAuthUser from "../hooks/useAuthUser";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
+import { completeOnboarding } from "../lib/api";
+import { LoaderIcon, MapPinIcon, ShipWheelIcon, ShuffleIcon } from "lucide-react";
+import { LANGUAGES } from "../constants";
+
+const OnboardingPage = () => {
+  const { authUser } = useAuthUser();
+  const queryClient = useQueryClient();
+
   const [formState, setFormState] = useState({
     fullName: authUser?.fullName || "",
     bio: authUser?.bio || "",
     nativeLanguage: authUser?.nativeLanguage || "",
-    learningLanguage: authUser?.learningLanguage || "",
+    learningLanguages: authUser?.learningLanguages || "",
     location: authUser?.location || "",
     profilePic: authUser?.profilePic || "",
-  })
-  const { mutate: onBoardingMutation, isPending } = useMutation({
+  });
+
+  const { mutate: onboardingMutation, isPending } = useMutation({
     mutationFn: completeOnboarding,
     onSuccess: () => {
-      toast.success("Profile Onboarded successfully")
-      queryClient.invalidateQueries({ queryKey: ["authUser"] })
+      toast.success("Profile onboarded successfully");
+      queryClient.invalidateQueries({ queryKey: ["authUser"] });
     },
+
     onError: (error) => {
-      toast.error(error.response.data.message)
-    }
-  })
+      toast.error(error.response.data.message);
+    },
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    onboardingMutation(formState);
+  };
+
   const handleRandomAvatar = () => {
-    const idx = Math.floor(Math.random() * 100) + 1; // 1-100 included
-    const randomAvatar = `https://avatar.iran.liara.run/public/${idx}.png`;
+    
+    const randomAvatar = `/i.png`;
 
     setFormState({ ...formState, profilePic: randomAvatar });
     toast.success("Random profile picture generated!");
   };
 
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    onBoardingMutation(formState)
-  }
   return (
     <div className="min-h-screen bg-base-100 flex items-center justify-center p-4">
       <div className="card bg-base-200 w-full max-w-3xl shadow-xl">
@@ -130,8 +136,8 @@ const onboardingPage = () => {
                 </label>
                 <select
                   name="learningLanguage"
-                  value={formState.learningLanguage}
-                  onChange={(e) => setFormState({ ...formState, learningLanguage: e.target.value })}
+                  value={formState.learningLanguages}
+                  onChange={(e) => setFormState({ ...formState, learningLanguages: e.target.value })}
                   className="select select-bordered w-full"
                 >
                   <option value="">Select language you're learning</option>
@@ -182,6 +188,5 @@ const onboardingPage = () => {
       </div>
     </div>
   );
-}
-
-export default onboardingPage;
+};
+export default OnboardingPage;

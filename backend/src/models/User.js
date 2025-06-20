@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema({
     },
     profilePic: {
         type: String,
-        default: "" // URL to the profile picture
+        default: "" 
     },
     nativeLanguage: {
         type: String,
